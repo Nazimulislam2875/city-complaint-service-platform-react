@@ -71,12 +71,6 @@ const ManageComplaints = () => {
     const handleStatusUpdate = async (id, newStatus) => {
         const action = newStatus === "resolved" ? "resolve" : "reject";
 
-        const confirmed = window.confirm(
-            `Are you sure you want to ${action} this complaint?`
-        );
-
-        if (!confirmed) return;
-
         try {
             const token = localStorage.getItem("access_token");
 
@@ -97,7 +91,9 @@ const ManageComplaints = () => {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.detail || `Failed to ${action} complaint`);
+                throw new Error(
+                    data.detail || `Failed to ${action} complaint`
+                );
             }
 
             toast.success(
@@ -108,17 +104,12 @@ const ManageComplaints = () => {
 
             fetchComplaints();
         } catch (error) {
+            console.error(error);
             toast.error(error.message || "Status update failed");
         }
     };
 
     const handleDelete = async (id) => {
-        const confirmed = window.confirm(
-            "Are you sure you want to permanently delete this complaint?"
-        );
-
-        if (!confirmed) return;
-
         try {
             const token = localStorage.getItem("access_token");
 
@@ -135,7 +126,9 @@ const ManageComplaints = () => {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.detail || "Failed to delete complaint");
+                throw new Error(
+                    data.detail || "Failed to delete complaint"
+                );
             }
 
             toast.success("Complaint deleted successfully");
@@ -146,6 +139,7 @@ const ManageComplaints = () => {
                 fetchComplaints();
             }
         } catch (error) {
+            console.error(error);
             toast.error(error.message || "Delete failed");
         }
     };
@@ -165,7 +159,6 @@ const ManageComplaints = () => {
 
     return (
         <section>
-
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-7">
                 <div>
                     <h1 className="text-3xl font-bold">
@@ -183,7 +176,6 @@ const ManageComplaints = () => {
             </div>
 
             <div className="bg-base-100 rounded-2xl shadow border border-base-300 p-4 mb-6">
-
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
 
                     <div className="relative xl:col-span-2">
@@ -270,7 +262,6 @@ const ManageComplaints = () => {
                     />
 
                 </div>
-
             </div>
 
             {loading && <Loading />}
@@ -339,13 +330,21 @@ const ManageComplaints = () => {
                                     </td>
 
                                     <td>
-                                        <span className={getPriorityClass(complaint.priority)}>
+                                        <span
+                                            className={getPriorityClass(
+                                                complaint.priority
+                                            )}
+                                        >
                                             {complaint.priority}
                                         </span>
                                     </td>
 
                                     <td>
-                                        <span className={getStatusClass(complaint.status)}>
+                                        <span
+                                            className={getStatusClass(
+                                                complaint.status
+                                            )}
+                                        >
                                             {complaint.status}
                                         </span>
                                     </td>
@@ -368,7 +367,12 @@ const ManageComplaints = () => {
                                             {complaint.status === "pending" && (
                                                 <>
                                                     <button
-                                                        onClick={() => handleStatusUpdate(complaint.id, "resolved")}
+                                                        onClick={() =>
+                                                            handleStatusUpdate(
+                                                                complaint.id,
+                                                                "resolved"
+                                                            )
+                                                        }
                                                         className="btn btn-sm btn-success text-white"
                                                         title="Resolve"
                                                     >
@@ -376,7 +380,12 @@ const ManageComplaints = () => {
                                                     </button>
 
                                                     <button
-                                                        onClick={() => handleStatusUpdate(complaint.id, "rejected")}
+                                                        onClick={() =>
+                                                            handleStatusUpdate(
+                                                                complaint.id,
+                                                                "rejected"
+                                                            )
+                                                        }
                                                         className="btn btn-sm btn-warning"
                                                         title="Reject"
                                                     >
@@ -386,7 +395,9 @@ const ManageComplaints = () => {
                                             )}
 
                                             <button
-                                                onClick={() => handleDelete(complaint.id)}
+                                                onClick={() =>
+                                                    handleDelete(complaint.id)
+                                                }
                                                 className="btn btn-sm btn-error text-white"
                                                 title="Delete"
                                             >
@@ -405,46 +416,51 @@ const ManageComplaints = () => {
                 </div>
             )}
 
-            {!loading && !error && complaints.length > 0 && totalPages > 1 && (
-                <div className="flex justify-center mt-8">
+            {!loading &&
+                !error &&
+                complaints.length > 0 &&
+                totalPages > 1 && (
+                    <div className="flex justify-center mt-8">
 
-                    <div className="join">
+                        <div className="join">
 
-                        <button
-                            className="join-item btn"
-                            disabled={page === 1}
-                            onClick={() => setPage(page - 1)}
-                        >
-                            «
-                        </button>
-
-                        {Array.from(
-                            { length: totalPages },
-                            (_, index) => index + 1
-                        ).map((number) => (
                             <button
-                                key={number}
-                                onClick={() => setPage(number)}
-                                className={`join-item btn ${
-                                    page === number ? "btn-primary" : ""
-                                }`}
+                                className="join-item btn"
+                                disabled={page === 1}
+                                onClick={() => setPage(page - 1)}
                             >
-                                {number}
+                                «
                             </button>
-                        ))}
 
-                        <button
-                            className="join-item btn"
-                            disabled={page === totalPages}
-                            onClick={() => setPage(page + 1)}
-                        >
-                            »
-                        </button>
+                            {Array.from(
+                                { length: totalPages },
+                                (_, index) => index + 1
+                            ).map((number) => (
+                                <button
+                                    key={number}
+                                    onClick={() => setPage(number)}
+                                    className={`join-item btn ${
+                                        page === number
+                                            ? "btn-primary"
+                                            : ""
+                                    }`}
+                                >
+                                    {number}
+                                </button>
+                            ))}
+
+                            <button
+                                className="join-item btn"
+                                disabled={page === totalPages}
+                                onClick={() => setPage(page + 1)}
+                            >
+                                »
+                            </button>
+
+                        </div>
 
                     </div>
-
-                </div>
-            )}
+                )}
 
         </section>
     );

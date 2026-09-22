@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { FaArrowLeft, FaUser, FaEnvelope, FaMapMarkerAlt, FaCalendarAlt, FaClipboardList, FaCheck, FaTimes, FaTrash } from "react-icons/fa";
+import {
+    FaArrowLeft,
+    FaUser,
+    FaEnvelope,
+    FaMapMarkerAlt,
+    FaCalendarAlt,
+    FaClipboardList,
+    FaCheck,
+    FaTimes,
+    FaTrash
+} from "react-icons/fa";
 import toast from "react-hot-toast";
 import BaseUrl from "../../services/BaseUrl";
 
@@ -48,12 +58,6 @@ const AdminComplaintDetails = () => {
     const handleStatusUpdate = async (newStatus) => {
         const action = newStatus === "resolved" ? "resolve" : "reject";
 
-        const confirmed = window.confirm(
-            `Are you sure you want to ${action} this complaint?`
-        );
-
-        if (!confirmed) return;
-
         try {
             setActionLoading(true);
 
@@ -94,12 +98,6 @@ const AdminComplaintDetails = () => {
     };
 
     const handleDelete = async () => {
-        const confirmed = window.confirm(
-            "Are you sure you want to permanently delete this complaint?"
-        );
-
-        if (!confirmed) return;
-
         try {
             setActionLoading(true);
 
@@ -163,7 +161,10 @@ const AdminComplaintDetails = () => {
                     <span>{error}</span>
                 </div>
 
-                <Link to="/admin/complaints" className="btn btn-outline">
+                <Link
+                    to="/admin/complaints"
+                    className="btn btn-outline"
+                >
                     <FaArrowLeft />
                     Back to Complaints
                 </Link>
@@ -350,8 +351,14 @@ const AdminComplaintDetails = () => {
                             disabled={actionLoading}
                             className="btn btn-error text-white"
                         >
-                            <FaTrash />
-                            Delete Complaint
+                            {actionLoading ? (
+                                <span className="loading loading-spinner loading-sm"></span>
+                            ) : (
+                                <>
+                                    <FaTrash />
+                                    Delete Complaint
+                                </>
+                            )}
                         </button>
 
                     </div>

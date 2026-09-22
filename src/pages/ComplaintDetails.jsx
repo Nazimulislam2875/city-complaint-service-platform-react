@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-import { FaArrowLeft, FaMapMarkerAlt, FaCalendarAlt, FaExclamationTriangle, FaClipboardList } from "react-icons/fa";
+import {
+    FaArrowLeft,
+    FaMapMarkerAlt,
+    FaCalendarAlt,
+    FaExclamationTriangle,
+    FaClipboardList
+} from "react-icons/fa";
 import BaseUrl from "../services/BaseUrl";
 
 const ComplaintDetails = () => {
@@ -14,6 +20,7 @@ const ComplaintDetails = () => {
         const fetchComplaint = async () => {
             try {
                 setLoading(true);
+                setError("");
 
                 const token = localStorage.getItem("access_token");
 
@@ -26,7 +33,9 @@ const ComplaintDetails = () => {
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.detail || "Failed to load complaint");
+                    throw new Error(
+                        data.detail || "Failed to load complaint"
+                    );
                 }
 
                 setComplaint(data);
@@ -56,7 +65,6 @@ const ComplaintDetails = () => {
 
     const formatDate = (date) => {
         if (!date) return "N/A";
-
         return new Date(date).toLocaleString();
     };
 
@@ -76,7 +84,10 @@ const ComplaintDetails = () => {
                         <span>{error}</span>
                     </div>
 
-                    <Link to="/complaints" className="btn btn-outline">
+                    <Link
+                        to="/complaints"
+                        className="btn btn-outline"
+                    >
                         <FaArrowLeft />
                         Back to My Complaints
                     </Link>
@@ -104,6 +115,7 @@ const ComplaintDetails = () => {
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 
                             <div className="flex items-start gap-4">
+
                                 <div className="w-12 h-12 rounded-xl bg-primary text-primary-content flex items-center justify-center shrink-0">
                                     <FaClipboardList className="text-xl" />
                                 </div>
@@ -117,6 +129,7 @@ const ComplaintDetails = () => {
                                         {complaint.title}
                                     </h1>
                                 </div>
+
                             </div>
 
                             <span className={getStatusClass(complaint.status)}>
@@ -168,7 +181,9 @@ const ComplaintDetails = () => {
                                 </p>
 
                                 <p className="font-medium capitalize">
-                                    {complaint.category.replace("_", " ")}
+                                    {complaint.category
+                                        ? complaint.category.replace("_", " ")
+                                        : "N/A"}
                                 </p>
                             </div>
 
@@ -198,14 +213,12 @@ const ComplaintDetails = () => {
 
                         {complaint.status === "pending" && (
                             <div className="flex gap-3 mt-6">
-
                                 <Link
                                     to={`/complaints/edit/${complaint.id}`}
                                     className="btn btn-warning flex-1"
                                 >
                                     Edit Complaint
                                 </Link>
-
                             </div>
                         )}
 

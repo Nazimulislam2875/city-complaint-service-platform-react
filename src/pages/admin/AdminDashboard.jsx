@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { FaClipboardList, FaClock, FaCheckCircle, FaTimesCircle, FaPlus } from "react-icons/fa";
+import {
+    FaClipboardList,
+    FaClock,
+    FaCheckCircle,
+    FaTimesCircle,
+    FaGlobe
+} from "react-icons/fa";
 import BaseUrl from "../../services/BaseUrl";
 
 const AdminDashboard = () => {
@@ -18,6 +24,7 @@ const AdminDashboard = () => {
         const fetchComplaints = async () => {
             try {
                 setLoading(true);
+                setError("");
 
                 const token = localStorage.getItem("access_token");
 
@@ -33,16 +40,24 @@ const AdminDashboard = () => {
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.detail || "Failed to load dashboard data");
+                    throw new Error(
+                        data.detail || "Failed to load dashboard data"
+                    );
                 }
 
                 const complaints = data.complaints || [];
 
                 setStats({
                     total: data.total || 0,
-                    pending: complaints.filter((item) => item.status === "pending").length,
-                    resolved: complaints.filter((item) => item.status === "resolved").length,
-                    rejected: complaints.filter((item) => item.status === "rejected").length,
+                    pending: complaints.filter(
+                        (item) => item.status === "pending"
+                    ).length,
+                    resolved: complaints.filter(
+                        (item) => item.status === "resolved"
+                    ).length,
+                    rejected: complaints.filter(
+                        (item) => item.status === "rejected"
+                    ).length,
                 });
             } catch (error) {
                 console.error(error);
@@ -73,7 +88,6 @@ const AdminDashboard = () => {
 
     return (
         <section>
-
             <div className="mb-7">
                 <h1 className="text-3xl font-bold">
                     Admin Dashboard
@@ -140,7 +154,7 @@ const AdminDashboard = () => {
 
                 <Link
                     to="/admin/complaints"
-                    className="bg-base-100 rounded-2xl shadow border border-base-300 p-6 hover:border-primary transition"
+                    className="bg-base-100 rounded-2xl shadow border border-base-300 p-6 hover:border-primary hover:shadow-lg transition"
                 >
                     <FaClipboardList className="text-primary text-3xl mb-3" />
 
@@ -155,9 +169,9 @@ const AdminDashboard = () => {
 
                 <Link
                     to="/"
-                    className="bg-base-100 rounded-2xl shadow border border-base-300 p-6 hover:border-primary transition"
+                    className="bg-base-100 rounded-2xl shadow border border-base-300 p-6 hover:border-secondary hover:shadow-lg transition"
                 >
-                    <FaPlus className="text-secondary text-3xl mb-3" />
+                    <FaGlobe className="text-secondary text-3xl mb-3" />
 
                     <h2 className="text-xl font-bold">
                         Visit Website
@@ -169,7 +183,6 @@ const AdminDashboard = () => {
                 </Link>
 
             </div>
-
         </section>
     );
 };
