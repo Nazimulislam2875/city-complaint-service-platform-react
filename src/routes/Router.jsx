@@ -18,6 +18,8 @@ import AdminProtected from "./AdminProtected.jsx";
 import AdminDashboard from "../pages/admin/AdminDashboard.jsx";
 import ManageComplaints from "../pages/admin/ManageComplaints.jsx";
 import AdminComplaintDetails from "../pages/admin/AdminComplaintDetails.jsx";
+import MyComplaintsPage from "../pages/MyComplaintsPage.jsx";
+import DeleteComplaint from "../pages/DeleteComplaint.jsx";
 
 const router = createBrowserRouter([
   {
@@ -81,7 +83,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/complaints/edit/:id",
+        path: "/complaints/update/:id",
         element: (
           <PrivateRoutes>
             <EditComplaint />
@@ -101,6 +103,22 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoutes>
             <ChangePassword />
+          </PrivateRoutes>
+        ),
+      },
+      {
+        path: "/complaints/my",
+        element: (
+          <PrivateRoutes>
+            <MyComplaintsPage />
+          </PrivateRoutes>
+        ),
+      },
+      {
+        path: "/complaints/delete/:id",
+        element: (
+          <PrivateRoutes>
+            <DeleteComplaint />
           </PrivateRoutes>
         ),
       },

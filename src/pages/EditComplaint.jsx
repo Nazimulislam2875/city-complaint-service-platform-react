@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
-import { FaCity, FaMapMarkerAlt, FaExclamationTriangle, FaFileAlt } from "react-icons/fa";
+import { Link, useNavigate, useParams } from "react-router";
+import { FaCity, FaMapMarkerAlt, FaExclamationTriangle, FaFileAlt, FaArrowLeft, FaClipboardList } from "react-icons/fa";
 import toast from "react-hot-toast";
 import BaseUrl from "../services/BaseUrl";
 
@@ -18,10 +18,14 @@ const EditComplaint = () => {
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         const fetchComplaint = async () => {
             try {
+                setLoading(true);
+                setError("");
+
                 const token = localStorage.getItem("access_token");
 
                 const response = await fetch(`${BaseUrl}/complaints/${id}`, {
@@ -33,7 +37,8 @@ const EditComplaint = () => {
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.detail || "Failed to load complaint");
+                    setError(data.detail || "Complaint not found");
+                    return;
                 }
 
                 if (data.status !== "pending") {
@@ -50,8 +55,8 @@ const EditComplaint = () => {
                     priority: data.priority || "medium",
                 });
             } catch (error) {
-                toast.error(error.message || "Failed to load complaint");
-                navigate("/complaints");
+                console.error(error);
+                setError("Complaint not found");
             } finally {
                 setLoading(false);
             }
@@ -135,6 +140,44 @@ const EditComplaint = () => {
         );
     }
 
+    if (error) {
+        return (
+            <section className="min-h-[calc(100vh-140px)] bg-base-200/40 px-4 py-10">
+                <div className="max-w-2xl mx-auto">
+
+                    <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-8 text-center">
+
+                        <div className="w-16 h-16 mx-auto rounded-2xl bg-error/10 text-error flex items-center justify-center mb-5">
+                            <FaClipboardList className="text-3xl" />
+                        </div>
+
+                        <h1 className="text-2xl font-bold mb-2">
+                            Complaint Not Found
+                        </h1>
+
+                        <p className="text-base-content/60 mb-2">
+                            No complaint was found with ID #{id}.
+                        </p>
+
+                        <p className="text-sm text-base-content/50 mb-6">
+                            Please check the complaint ID and try again.
+                        </p>
+
+                        <Link
+                            to="/complaints"
+                            className="btn btn-primary"
+                        >
+                            <FaArrowLeft />
+                            Back to My Complaints
+                        </Link>
+
+                    </div>
+
+                </div>
+            </section>
+        );
+    }
+
     return (
         <section className="min-h-[calc(100vh-140px)] bg-base-200/40 px-4 py-8">
             <div className="max-w-2xl mx-auto">
@@ -144,7 +187,9 @@ const EditComplaint = () => {
                         <FaCity className="text-xl" />
                     </div>
 
-                    <h1 className="text-2xl font-bold">Edit Complaint</h1>
+                    <h1 className="text-2xl font-bold">
+                        Edit Complaint
+                    </h1>
 
                     <p className="text-sm text-base-content/60 mt-1">
                         Update your pending complaint

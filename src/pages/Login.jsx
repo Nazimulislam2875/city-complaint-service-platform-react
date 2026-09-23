@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { AuthContext } from "../context/AuthProvider";
 import { FaCity, FaUser, FaLock } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -7,13 +7,10 @@ import toast from "react-hot-toast";
 const Login = () => {
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
-    const location = useLocation();
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
-
-    const from = location.state?.from?.pathname || "/dashboard";
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -25,9 +22,12 @@ const Login = () => {
 
         try {
             setLoading(true);
+
             await login(username, password);
+
             toast.success("Login successful");
-            navigate(from, { replace: true });
+
+            navigate("/", { replace: true });
         } catch (error) {
             toast.error(error.message || "Login failed");
         } finally {
@@ -44,7 +44,10 @@ const Login = () => {
                         <FaCity className="text-xl" />
                     </div>
 
-                    <h1 className="text-2xl font-bold">Welcome Back</h1>
+                    <h1 className="text-2xl font-bold">
+                        Welcome Back
+                    </h1>
+
                     <p className="text-sm text-base-content/60 mt-1">
                         Login to your CivicConnect account
                     </p>
@@ -53,7 +56,9 @@ const Login = () => {
                 <form onSubmit={handleSubmit} className="space-y-4">
 
                     <div>
-                        <label className="text-sm font-medium">Username</label>
+                        <label className="text-sm font-medium">
+                            Username
+                        </label>
 
                         <div className="relative mt-1">
                             <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm" />
@@ -69,7 +74,9 @@ const Login = () => {
                     </div>
 
                     <div>
-                        <label className="text-sm font-medium">Password</label>
+                        <label className="text-sm font-medium">
+                            Password
+                        </label>
 
                         <div className="relative mt-1">
                             <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm" />
@@ -107,10 +114,13 @@ const Login = () => {
 
                 </form>
 
-                <div className="divider text-xs">OR</div>
+                <div className="divider text-xs">
+                    OR
+                </div>
 
                 <p className="text-center text-sm text-base-content/60">
                     Don't have an account?{" "}
+
                     <Link
                         to="/signup"
                         className="text-primary font-semibold hover:underline"

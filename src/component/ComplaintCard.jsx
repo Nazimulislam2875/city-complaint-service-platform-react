@@ -17,7 +17,6 @@ const ComplaintCard = ({ complaint, onDelete }) => {
 
     return (
         <div className="bg-base-100 rounded-2xl shadow border border-base-300 p-5 hover:shadow-lg transition">
-
             <div className="flex items-start justify-between gap-3 mb-3">
                 <h2 className="font-bold text-lg line-clamp-2">
                     {complaint.title}
@@ -33,7 +32,6 @@ const ComplaintCard = ({ complaint, onDelete }) => {
             </p>
 
             <div className="flex flex-wrap gap-2 mb-4">
-
                 <span className="badge badge-outline capitalize">
                     {complaint.category.replace("_", " ")}
                 </span>
@@ -41,7 +39,6 @@ const ComplaintCard = ({ complaint, onDelete }) => {
                 <span className={getPriorityClass(complaint.priority)}>
                     {complaint.priority}
                 </span>
-
             </div>
 
             <p className="text-sm text-base-content/60 mb-4 flex items-start gap-2">
@@ -50,7 +47,6 @@ const ComplaintCard = ({ complaint, onDelete }) => {
             </p>
 
             <div className="flex gap-2">
-
                 <Link
                     to={`/complaints/${complaint.id}`}
                     className="btn btn-sm btn-outline flex-1"
@@ -62,25 +58,23 @@ const ComplaintCard = ({ complaint, onDelete }) => {
                 {complaint.status === "pending" && (
                     <>
                         <Link
-                            to={`/complaints/edit/${complaint.id}`}
+                            to={`/complaints/update/${complaint.id}`}
                             className="btn btn-sm btn-warning"
-                            title="Edit"
+                            title="Edit Complaint"
                         >
                             <FaEdit />
                         </Link>
 
-                        <button
-                            onClick={() => onDelete(complaint.id)}
+                        <Link
+                            to={`/complaints/delete/${complaint.id}`}
                             className="btn btn-sm btn-error text-white"
-                            title="Delete"
+                            title="Delete Complaint"
                         >
                             <FaTrash />
-                        </button>
+                        </Link>
                     </>
                 )}
-
             </div>
-
         </div>
     );
 };

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaHashtag } from "react-icons/fa";
 import toast from "react-hot-toast";
 import BaseUrl from "../services/BaseUrl";
 import ComplaintCard from "../component/ComplaintCard";
@@ -25,35 +25,55 @@ const MyComplaints = () => {
             setError("");
 
             const token = localStorage.getItem("access_token");
+
+            if (!token) {
+                throw new Error("Please login first");
+            }
+
             const params = new URLSearchParams();
 
-            if (search) params.append("search", search);
-            if (category) params.append("category", category);
-            if (status) params.append("status", status);
+            if (search.trim()) {
+                params.append("search", search.trim());
+            }
+
+            if (category) {
+                params.append("category", category);
+            }
+
+            if (status) {
+                params.append("status", status);
+            }
 
             params.append("sort", sort);
             params.append("page", page);
             params.append("page_size", pageSize);
 
-            const response = await fetch(
-                `${BaseUrl}/complaints/my?${params.toString()}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            const url = `${BaseUrl}/complaints/my?${params.toString()}`;
+
+            console.log("My Complaints API:", url);
+
+            const response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
 
             const data = await response.json();
 
+            console.log("My Complaints Response:", data);
+
             if (!response.ok) {
-                throw new Error(data.detail || "Failed to load complaints");
+                throw new Error(
+                    data.detail || "Failed to load complaints"
+                );
             }
 
             setComplaints(data.complaints || []);
             setTotalPages(data.total_pages || 1);
         } catch (error) {
-            console.error(error);
+            console.error("My Complaints Error:", error);
             setError(error.message || "Something went wrong");
         } finally {
             setLoading(false);
@@ -65,12 +85,6 @@ const MyComplaints = () => {
     }, [search, category, status, sort, page]);
 
     const handleDelete = async (id) => {
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this complaint?"
-        );
-
-        if (!confirmed) return;
-
         try {
             const token = localStorage.getItem("access_token");
 
@@ -87,12 +101,20 @@ const MyComplaints = () => {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.detail || "Failed to delete complaint");
+                throw new Error(
+                    data.detail || "Failed to delete complaint"
+                );
             }
 
             toast.success("Complaint deleted successfully");
-            fetchComplaints();
+
+            if (complaints.length === 1 && page > 1) {
+                setPage(page - 1);
+            } else {
+                fetchComplaints();
+            }
         } catch (error) {
+            console.error(error);
             toast.error(error.message || "Delete failed");
         }
     };
@@ -101,6 +123,7 @@ const MyComplaints = () => {
         <section className="min-h-screen bg-base-200/40 px-4 py-8">
             <div className="max-w-7xl mx-auto">
 
+                {/* Header */}
                 <div className="mb-7">
                     <h1 className="text-3xl font-bold">
                         My Complaints
@@ -111,16 +134,17 @@ const MyComplaints = () => {
                     </p>
                 </div>
 
+                {/* Filters */}
                 <div className="bg-base-100 rounded-2xl shadow border border-base-300 p-4 mb-6">
-
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
 
+                        {/* Search */}
                         <div className="relative">
                             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
 
                             <input
                                 type="text"
-                                placeholder="Search by title..."
+                                placeholder="Search by title or complaint ID..."
                                 value={search}
                                 onChange={(e) => {
                                     setSearch(e.target.value);
@@ -130,6 +154,7 @@ const MyComplaints = () => {
                             />
                         </div>
 
+                        {/* Category */}
                         <select
                             value={category}
                             onChange={(e) => {
@@ -150,6 +175,7 @@ const MyComplaints = () => {
                             <option value="other">Other</option>
                         </select>
 
+                        {/* Status */}
                         <select
                             value={status}
                             onChange={(e) => {
@@ -164,6 +190,7 @@ const MyComplaints = () => {
                             <option value="rejected">Rejected</option>
                         </select>
 
+                        {/* Sort */}
                         <select
                             value={sort}
                             onChange={(e) => {
@@ -180,14 +207,17 @@ const MyComplaints = () => {
                     </div>
                 </div>
 
+                {/* Loading */}
                 {loading && <Loading />}
 
+                {/* Error */}
                 {!loading && error && (
                     <div className="alert alert-error">
                         <span>{error}</span>
                     </div>
                 )}
 
+                {/* Empty */}
                 {!loading && !error && complaints.length === 0 && (
                     <EmptyState
                         title="No Complaints Found"
@@ -195,29 +225,43 @@ const MyComplaints = () => {
                     />
                 )}
 
+                {/* Complaints */}
                 {!loading && !error && complaints.length > 0 && (
                     <>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-
                             {complaints.map((complaint) => (
-                                <ComplaintCard
+                                <div
                                     key={complaint.id}
-                                    complaint={complaint}
-                                    onDelete={handleDelete}
-                                />
-                            ))}
+                                    className="bg-base-100 rounded-2xl border border-base-300 shadow-sm overflow-hidden"
+                                >
+                                    {/* Complaint ID */}
+                                    <div className="px-5 pt-5">
+                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                                            <FaHashtag />
+                                            Complaint ID: {complaint.id}
+                                        </div>
+                                    </div>
 
+                                    {/* Existing Card */}
+                                    <ComplaintCard
+                                        complaint={complaint}
+                                        onDelete={handleDelete}
+                                    />
+                                </div>
+                            ))}
                         </div>
 
+                        {/* Pagination */}
                         {totalPages > 1 && (
                             <div className="flex justify-center mt-8">
-
                                 <div className="join">
 
                                     <button
                                         className="join-item btn"
                                         disabled={page === 1}
-                                        onClick={() => setPage(page - 1)}
+                                        onClick={() =>
+                                            setPage(page - 1)
+                                        }
                                     >
                                         «
                                     </button>
@@ -228,9 +272,13 @@ const MyComplaints = () => {
                                     ).map((number) => (
                                         <button
                                             key={number}
-                                            onClick={() => setPage(number)}
+                                            onClick={() =>
+                                                setPage(number)
+                                            }
                                             className={`join-item btn ${
-                                                page === number ? "btn-primary" : ""
+                                                page === number
+                                                    ? "btn-primary"
+                                                    : ""
                                             }`}
                                         >
                                             {number}
@@ -240,16 +288,16 @@ const MyComplaints = () => {
                                     <button
                                         className="join-item btn"
                                         disabled={page === totalPages}
-                                        onClick={() => setPage(page + 1)}
+                                        onClick={() =>
+                                            setPage(page + 1)
+                                        }
                                     >
                                         »
                                     </button>
 
                                 </div>
-
                             </div>
                         )}
-
                     </>
                 )}
 

@@ -7,27 +7,29 @@ import {
     FaExclamationTriangle,
     FaClipboardList,
     FaTrash,
-    FaEdit
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import BaseUrl from "../services/BaseUrl";
 
-const ComplaintDetails = () => {
+const DeleteComplaint = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
     const [complaint, setComplaint] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
     const [deleting, setDeleting] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         const fetchComplaint = async () => {
             try {
-                setLoading(true);
-                setError("");
-
                 const token = localStorage.getItem("access_token");
+
+                if (!token) {
+                    toast.error("Please login first");
+                    navigate("/login", { replace: true });
+                    return;
+                }
 
                 const response = await fetch(`${BaseUrl}/complaints/${id}`, {
                     headers: {
@@ -38,22 +40,21 @@ const ComplaintDetails = () => {
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(
-                        data.detail || "Failed to load complaint"
-                    );
+                    setError(data.detail || "Complaint not found");
+                    return;
                 }
 
                 setComplaint(data);
             } catch (error) {
                 console.error(error);
-                setError(error.message || "Something went wrong");
+                setError("Something went wrong");
             } finally {
                 setLoading(false);
             }
         };
 
         fetchComplaint();
-    }, [id]);
+    }, [id, navigate]);
 
     const handleDelete = async () => {
         try {
@@ -81,7 +82,7 @@ const ComplaintDetails = () => {
 
             toast.success("Complaint deleted successfully");
 
-            navigate("/complaints");
+            navigate("/complaints", { replace: true });
         } catch (error) {
             console.error(error);
             toast.error(error.message || "Delete failed");
@@ -116,21 +117,31 @@ const ComplaintDetails = () => {
         );
     }
 
-    if (error) {
+    if (error || !complaint) {
         return (
             <section className="min-h-[calc(100vh-140px)] bg-base-200/40 px-4 py-10">
-                <div className="max-w-3xl mx-auto">
-                    <div className="alert alert-error mb-5">
-                        <span>{error}</span>
-                    </div>
+                <div className="max-w-2xl mx-auto">
+                    <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-8 text-center">
 
-                    <Link
-                        to="/complaints"
-                        className="btn btn-outline"
-                    >
-                        <FaArrowLeft />
-                        Back to My Complaints
-                    </Link>
+                        <FaClipboardList className="text-5xl text-base-content/30 mx-auto mb-4" />
+
+                        <h1 className="text-2xl font-bold mb-2">
+                            Complaint Not Found
+                        </h1>
+
+                        <p className="text-base-content/60 mb-6">
+                            No complaint was found with ID #{id}.
+                        </p>
+
+                        <Link
+                            to="/complaints"
+                            className="btn btn-primary"
+                        >
+                            <FaArrowLeft />
+                            Back to My Complaints
+                        </Link>
+
+                    </div>
                 </div>
             </section>
         );
@@ -150,13 +161,13 @@ const ComplaintDetails = () => {
 
                 <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 overflow-hidden">
 
-                    <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 border-b border-base-300">
+                    <div className="bg-gradient-to-r from-error/10 to-warning/10 p-6 border-b border-base-300">
 
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 
                             <div className="flex items-start gap-4">
 
-                                <div className="w-12 h-12 rounded-xl bg-primary text-primary-content flex items-center justify-center shrink-0">
+                                <div className="w-12 h-12 rounded-xl bg-error text-error-content flex items-center justify-center shrink-0">
                                     <FaClipboardList className="text-xl" />
                                 </div>
 
@@ -172,7 +183,7 @@ const ComplaintDetails = () => {
 
                             </div>
 
-                            <span className={getStatusClass(complaint.status)}>
+                            <span className={`${getStatusClass(complaint.status)} capitalize`}>
                                 {complaint.status}
                             </span>
 
@@ -210,7 +221,7 @@ const ComplaintDetails = () => {
                                     Priority
                                 </div>
 
-                                <span className={getPriorityClass(complaint.priority)}>
+                                <span className={`${getPriorityClass(complaint.priority)} capitalize`}>
                                     {complaint.priority}
                                 </span>
                             </div>
@@ -240,53 +251,37 @@ const ComplaintDetails = () => {
 
                         </div>
 
-                        <div className="mt-4 bg-base-200 rounded-xl p-4">
-                            <div className="flex items-center gap-2 text-sm text-base-content/60 mb-2">
-                                <FaCalendarAlt />
-                                Last Updated
-                            </div>
+                        <div className="mt-6 flex gap-3">
 
-                            <p className="font-medium text-sm">
-                                {formatDate(complaint.updated_at)}
-                            </p>
+                            <Link
+                                to="/complaints"
+                                className="btn btn-outline flex-1"
+                            >
+                                Cancel
+                            </Link>
+
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                className="btn btn-error text-white flex-1"
+                            >
+                                {deleting ? (
+                                    <span className="loading loading-spinner loading-sm"></span>
+                                ) : (
+                                    <>
+                                        <FaTrash />
+                                        Delete Complaint
+                                    </>
+                                )}
+                            </button>
+
                         </div>
 
-                        {complaint.status === "pending" && (
-                            <div className="flex gap-3 mt-6">
-
-                                <Link
-                                    to={`/complaints/update/${complaint.id}`}
-                                    className="btn btn-warning flex-1"
-                                >
-                                    <FaEdit />
-                                    Edit Complaint
-                                </Link>
-
-                                <button
-                                    onClick={handleDelete}
-                                    disabled={deleting}
-                                    className="btn btn-error text-white flex-1"
-                                >
-                                    {deleting ? (
-                                        <span className="loading loading-spinner loading-sm"></span>
-                                    ) : (
-                                        <>
-                                            <FaTrash />
-                                            Delete Complaint
-                                        </>
-                                    )}
-                                </button>
-
-                            </div>
-                        )}
-
                     </div>
-
                 </div>
-
             </div>
         </section>
     );
 };
 
-export default ComplaintDetails;
+export default DeleteComplaint;
